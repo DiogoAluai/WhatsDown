@@ -8,7 +8,6 @@
     <string name="database_name">whats_down_db</string>
     <string name="title_activity_pick_username">PickUsernameActivity</string>
     <string name="pickUsernameButtonString">DONE</string>
-    <!-- username hint is shared with default value for correspondent UserValueKey   -->
-    <string name="usernameInputHint">Usernameless</string>
+    <string name="usernameInputHint">Username</string>
     <string name="usernameActivityTittleLabel">Pick a username</string>
 </resources>

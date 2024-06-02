@@ -15,9 +15,11 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 import javax.inject.Inject;
@@ -38,9 +40,12 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_USERNAME_CODE = 1;
 
     private static final ALog LOG = new ALog(MainActivity.class);
+    private static final Executor executor = Executors.newSingleThreadExecutor();
 
     @Inject
     UserValueManager userValueManager;
+
+    private UsernameViewModel usernameViewModel;
 
     private ArrayList<String> serviceList;
     private DeviceAdapter deviceAdapter;
@@ -54,12 +59,17 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         LOG.i("Creating Main Activity");
         setContentView(R.layout.activity_main);
+        initializeViewModel();
         initializeComponents();
 
         //todo: always lunch username picker activity when username is null
 //        launchUsernameActivityIfUserNull();
         setObserverForUsernameTitle();
         registerAndStartServiceDiscovery();
+    }
+
+    private void initializeViewModel() {
+        usernameViewModel = new ViewModelProvider(this).get(UsernameViewModel.class);
     }
 
     private void initializeComponents() {
@@ -73,8 +83,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setObserverForUsernameTitle() {
-        userValueManager.getUserValue(UserValueKeys.USERNAME, usernameValue -> {
-            usernameTitle.setText(usernameValue.getValue());
+        usernameViewModel.getUsernameLive().observe(this, stringUserValue -> {
+            String usernameValue = stringUserValue.getValue();
+            usernameTitle.setText(usernameValue);
+                executor.execute(() -> {
+                    jmdns.unregisterAllServices();
+                    tryRegisterMyWhatsDownService(usernameValue);
+                });
         });
     }
 
@@ -88,7 +103,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode != REQUEST_USERNAME_CODE ) {
+        if (requestCode != REQUEST_USERNAME_CODE) {
             LOG.e("Received unrecognizable activity request code: " + requestCode);
             Toast.makeText(getApplicationContext(), "Something went wrong, please restart the app.", Toast.LENGTH_LONG)
                     .show();
@@ -108,7 +123,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void registerAndStartServiceDiscovery() {
-        Executors.newSingleThreadExecutor().execute(() -> {
+        executor.execute(() -> {
             try {
                 jmdns = JmDNS.create(LocalIpProbe.firstActiveIPv4Interface().getInetAddress());
             } catch (IOException e) {
@@ -125,13 +140,17 @@ public class MainActivity extends AppCompatActivity {
     private void registerOurWhatsDownService() {
         LOG.i("Registering to mDns service");
         // already in a parallel thread, db queries are fine
-        userValueManager.getUserValue(UserValueKeys.USERNAME, stringUserValue -> {
-            try {
-                jmdns.registerService(createMyWhatsDownService(stringUserValue.getValue()));
-            } catch (IOException e) {
-                LOG.e("Error registering my service", e);
-            }
-        }, false);
+        userValueManager.getUserValue(UserValueKeys.USERNAME, usernameValue ->
+                tryRegisterMyWhatsDownService(usernameValue.getValue()),
+                false);
+    }
+
+    private void tryRegisterMyWhatsDownService(String username) {
+        try {
+            jmdns.registerService(createMyWhatsDownService(username));
+        } catch (IOException e) {
+            LOG.e("Error registering my service", e);
+        }
     }
 
     @NonNull

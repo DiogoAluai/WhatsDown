@@ -16,7 +16,8 @@ import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
 import daluai.app.whatsdown.R;
-import daluai.app.whatsdown.data.repository.UserValueRepository;
+import daluai.app.whatsdown.data.manager.UserValueKeys;
+import daluai.app.whatsdown.data.manager.UserValueManager;
 
 @AndroidEntryPoint
 public class PickUsernameActivity extends AppCompatActivity {
@@ -24,7 +25,7 @@ public class PickUsernameActivity extends AppCompatActivity {
     // todo: handle user going back without setting username
 
     @Inject
-    UserValueRepository userValueRepository;
+    UserValueManager userValueManager;
 
     private static final ALog LOG = new ALog(PickUsernameActivity.class);
 
@@ -43,6 +44,13 @@ public class PickUsernameActivity extends AppCompatActivity {
     private void initializeComponents() {
         button = findViewById(R.id.usernameDoneButton);
         usernameInput = findViewById(R.id.usernameEditText);
+        userValueManager.getUserValue(UserValueKeys.USERNAME, userValue -> {
+            if (userValue == null || userValue.getValue().equals(UserValueKeys.USERNAME.getDefaultValue())) {
+                // leave edit text empty so that user sees hint
+                return;
+            }
+            usernameInput.setText(userValue.getValue());
+        });
     }
 
     private void addTextChangedListener() {

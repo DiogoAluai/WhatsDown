@@ -1,4 +1,4 @@
-package daluai.app.whatsdown.data.utils;
+package daluai.app.whatsdown.utils;
 
 import android.os.Handler;
 import android.os.Looper;

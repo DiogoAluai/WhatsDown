@@ -1,5 +1,6 @@
 package daluai.app.whatsdown.data.dao;
 
+import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
@@ -13,6 +14,9 @@ import daluai.app.whatsdown.data.model.UserValueRaw;
 
 @Dao
 public interface UserValueDao {
+
+    @Query("SELECT * FROM user_values WHERE `key` = :key")
+    LiveData<UserValueRaw> getUserValueLive(String key);
 
     @Query("SELECT * FROM user_values")
     List<UserValueRaw> getAll();

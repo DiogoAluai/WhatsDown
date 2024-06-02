@@ -8,8 +8,8 @@ import javax.inject.Inject;
 
 import daluai.app.whatsdown.data.dao.UserValueDao;
 import daluai.app.whatsdown.data.model.UserValueRaw;
-import daluai.app.whatsdown.data.utils.UiUtils;
 import daluai.app.whatsdown.ui.ALog;
+import daluai.app.whatsdown.utils.UiUtils;
 
 public class UserValueManagerImpl implements UserValueManager {
 
