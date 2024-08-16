@@ -1,4 +1,4 @@
-package daluai.app.whatsdown.ui;
+package daluai.app.whatsdown.ui.main;
 
 import android.content.Context;
 import android.view.LayoutInflater;

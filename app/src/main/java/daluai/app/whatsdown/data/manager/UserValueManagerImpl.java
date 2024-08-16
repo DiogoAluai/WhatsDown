@@ -6,14 +6,14 @@ import java.util.function.Consumer;
 
 import javax.inject.Inject;
 
+import daluai.app.sdk_boost.wrapper.Logger;
+import daluai.app.sdk_boost.wrapper.UiUtils;
 import daluai.app.whatsdown.data.dao.UserValueDao;
 import daluai.app.whatsdown.data.model.UserValueRaw;
-import daluai.app.whatsdown.ui.ALog;
-import daluai.app.whatsdown.utils.UiUtils;
 
 public class UserValueManagerImpl implements UserValueManager {
 
-    private static final ALog LOG = new ALog(UserValueManagerImpl.class);
+    private static final Logger LOG = Logger.ofClass(UserValueManagerImpl.class);
 
     @Inject
     UserValueDao userValueDao;

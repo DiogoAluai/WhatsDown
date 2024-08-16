@@ -69,7 +69,6 @@ public class ExampleUnitTest {
         }
 
         // Close the JmDNS instance
-        jmdns.close();    }
-
-
+        jmdns.close();
+    }
 }

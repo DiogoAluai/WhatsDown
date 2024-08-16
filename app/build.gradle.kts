@@ -52,6 +52,8 @@ dependencies {
     annotationProcessor(libs.room.compiler)
 
     implementation(libs.network.utils)
+    implementation(libs.sdk.boost)
+
     implementation(libs.jmdns)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

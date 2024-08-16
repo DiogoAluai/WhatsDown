@@ -1,4 +1,4 @@
-package daluai.app.whatsdown.ui;
+package daluai.app.whatsdown.ui.main;
 
 import static daluai.app.whatsdown.ui.ActivityApi.INTENT_EXTRA_USERNAME;
 import static daluai.app.whatsdown.ui.WhatsDownConstants.PROP_USER_ALIAS;
@@ -29,6 +29,7 @@ import javax.jmdns.ServiceInfo;
 import javax.jmdns.ServiceListener;
 
 import dagger.hilt.android.AndroidEntryPoint;
+import daluai.app.sdk_boost.wrapper.Logger;
 import daluai.app.whatsdown.R;
 import daluai.app.whatsdown.data.manager.UserValueKeys;
 import daluai.app.whatsdown.data.manager.UserValueManager;
@@ -40,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int REQUEST_USERNAME_CODE = 1;
 
-    private static final ALog LOG = new ALog(MainActivity.class);
+    private static final Logger LOG = Logger.ofClass(MainActivity.class);
     private static final Executor executor = Executors.newSingleThreadExecutor();
 
     @Inject

@@ -16,6 +16,7 @@ navigationUi = "2.7.7"
 networkUtils = "0.0.1-SNAPSHOT"
 hiltAndroid = "2.51.1"
 room = "2.6.1"
+sdkBoost = "1.2.0-SNAPSHOT"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -43,6 +44,7 @@ hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltA
 hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hiltAndroid" }
 room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
 room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
+sdk-boost = { module = "com.github.DiogoAluai:sdk-boost", version.ref = "sdkBoost" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

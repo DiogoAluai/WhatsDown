@@ -1,4 +1,4 @@
-package daluai.app.whatsdown.ui;
+package daluai.app.whatsdown.ui.pickusername;
 
 import static daluai.app.whatsdown.ui.ActivityApi.INTENT_EXTRA_USERNAME;
 
@@ -15,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
+import daluai.app.sdk_boost.wrapper.Logger;
 import daluai.app.whatsdown.R;
 import daluai.app.whatsdown.data.manager.UserValueKeys;
 import daluai.app.whatsdown.data.manager.UserValueManager;
@@ -27,7 +28,7 @@ public class PickUsernameActivity extends AppCompatActivity {
     @Inject
     UserValueManager userValueManager;
 
-    private static final ALog LOG = new ALog(PickUsernameActivity.class);
+    private static final Logger LOG = Logger.ofClass(PickUsernameActivity.class);
 
     private Button button;
     private EditText usernameInput;

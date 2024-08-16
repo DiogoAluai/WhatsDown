@@ -1,9 +1,9 @@
 package daluai.app.whatsdown.data.manager;
 
+import daluai.app.sdk_boost.wrapper.Logger;
 import daluai.app.whatsdown.data.manager.converter.UserValueConverter;
 import daluai.app.whatsdown.data.manager.converter.UserValueIntegerConverter;
 import daluai.app.whatsdown.data.manager.converter.UserValueStringConverter;
-import daluai.app.whatsdown.ui.ALog;
 
 public enum UserValueType {
 
@@ -11,7 +11,7 @@ public enum UserValueType {
     STRING("STRING", new UserValueStringConverter()),
     INTEGER("INTEGER", new UserValueIntegerConverter());
 
-    private static final ALog LOG = new ALog(UserValueType.class);
+    private static final Logger LOG = Logger.ofClass(UserValueType.class);
 
     private final String dbValue;
     private final UserValueConverter converter;

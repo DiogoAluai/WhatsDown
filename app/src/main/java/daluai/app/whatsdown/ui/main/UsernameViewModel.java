@@ -1,4 +1,4 @@
-package daluai.app.whatsdown.ui;
+package daluai.app.whatsdown.ui.main;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Transformations;
