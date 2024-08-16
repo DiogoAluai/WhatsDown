@@ -25,8 +25,8 @@ import daluai.app.sdk_boost.wrapper.LazyViewFactory;
 import daluai.app.sdk_boost.wrapper.Logger;
 import daluai.app.sdk_boost.wrapper.ToastHandler;
 import daluai.app.whatsdown.R;
-import daluai.app.whatsdown.data.manager.UserValueKeys;
 import daluai.app.whatsdown.data.manager.UserValueManager;
+import daluai.app.whatsdown.data.manager.dto.UserValueKeys;
 import daluai.app.whatsdown.ui.pickusername.PickUsernameActivity;
 import daluai.lib.network_utils.LocalIpProbe;
 

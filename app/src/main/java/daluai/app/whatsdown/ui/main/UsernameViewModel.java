@@ -10,8 +10,8 @@ import javax.inject.Inject;
 
 import dagger.hilt.android.lifecycle.HiltViewModel;
 import daluai.app.whatsdown.data.dao.UserValueDao;
-import daluai.app.whatsdown.data.manager.UserValue;
-import daluai.app.whatsdown.data.manager.UserValueKeys;
+import daluai.app.whatsdown.data.manager.dto.UserValue;
+import daluai.app.whatsdown.data.manager.dto.UserValueKeys;
 import daluai.app.whatsdown.data.model.UserValueRaw;
 
 @HiltViewModel

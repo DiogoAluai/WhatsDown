@@ -1,4 +1,4 @@
-package daluai.app.whatsdown.data.manager;
+package daluai.app.whatsdown.data.manager.dto;
 
 import daluai.app.sdk_boost.wrapper.Logger;
 import daluai.app.whatsdown.data.manager.converter.UserValueConverter;

@@ -9,6 +9,8 @@ import javax.inject.Inject;
 import daluai.app.sdk_boost.wrapper.Logger;
 import daluai.app.sdk_boost.wrapper.UiUtils;
 import daluai.app.whatsdown.data.dao.UserValueDao;
+import daluai.app.whatsdown.data.manager.dto.UserValue;
+import daluai.app.whatsdown.data.manager.dto.UserValueKey;
 import daluai.app.whatsdown.data.model.UserValueRaw;
 
 public class UserValueManagerImpl implements UserValueManager {

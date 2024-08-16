@@ -5,8 +5,8 @@ import androidx.room.Entity;
 import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
-import daluai.app.whatsdown.data.manager.UserValue;
-import daluai.app.whatsdown.data.manager.UserValueType;
+import daluai.app.whatsdown.data.manager.dto.UserValue;
+import daluai.app.whatsdown.data.manager.dto.UserValueType;
 
 @Entity(tableName = "user_values")
 public class UserValueRaw {

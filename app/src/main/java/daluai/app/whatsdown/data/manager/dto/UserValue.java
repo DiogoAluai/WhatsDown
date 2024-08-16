@@ -1,4 +1,4 @@
-package daluai.app.whatsdown.data.manager;
+package daluai.app.whatsdown.data.manager.dto;
 
 public class UserValue<T> {
 

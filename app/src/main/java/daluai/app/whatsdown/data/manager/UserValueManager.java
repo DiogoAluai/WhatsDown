@@ -4,6 +4,9 @@ import java.util.function.Consumer;
 
 import javax.inject.Singleton;
 
+import daluai.app.whatsdown.data.manager.dto.UserValue;
+import daluai.app.whatsdown.data.manager.dto.UserValueKey;
+
 /**
  * Syncing on boot might be costly.
  * Instead let's return default values and update database when null is fetched.

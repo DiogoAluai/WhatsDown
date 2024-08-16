@@ -17,8 +17,8 @@ import dagger.hilt.android.AndroidEntryPoint;
 import daluai.app.sdk_boost.wrapper.Logger;
 import daluai.app.sdk_boost.wrapper.ToastHandler;
 import daluai.app.whatsdown.R;
-import daluai.app.whatsdown.data.manager.UserValueKeys;
 import daluai.app.whatsdown.data.manager.UserValueManager;
+import daluai.app.whatsdown.data.manager.dto.UserValueKeys;
 
 @AndroidEntryPoint
 public class PickUsernameActivity extends AppCompatActivity {
