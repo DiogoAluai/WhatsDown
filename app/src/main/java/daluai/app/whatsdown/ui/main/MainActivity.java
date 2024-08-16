@@ -25,6 +25,7 @@ import daluai.app.sdk_boost.wrapper.LazyViewFactory;
 import daluai.app.sdk_boost.wrapper.Logger;
 import daluai.app.sdk_boost.wrapper.ToastHandler;
 import daluai.app.whatsdown.R;
+import daluai.app.whatsdown.data.manager.MessageManager;
 import daluai.app.whatsdown.data.manager.UserValueManager;
 import daluai.app.whatsdown.data.manager.dto.UserValueKeys;
 import daluai.app.whatsdown.ui.pickusername.PickUsernameActivity;
@@ -43,6 +44,9 @@ public class MainActivity extends AppCompatActivity {
 
     @Inject
     UserValueManager userValueManager;
+
+    @Inject
+    MessageManager messageManager;
 
     private ToastHandler toastHandler;
     private UsernameViewModel usernameViewModel;
@@ -68,11 +72,16 @@ public class MainActivity extends AppCompatActivity {
 
         initializeComponents();
 
-        if (usernameViewModel.getUsernameLive() == null) {
-            launchUsernameActivity();
-        }
+        userValueManager.getUserValue(UserValueKeys.USERNAME, userValue -> {
+            if (userValue == null || userValue.getValue().equals(UserValueKeys.USERNAME.getDefaultValue())) {
+                // no username found, let's have the user pick one
+                launchUsernameActivity();
+            }
+        });
+
         setObserverForUsernameTitle();
         registerAndStartServiceDiscovery();
+
     }
 
     private void initializeComponents() {
