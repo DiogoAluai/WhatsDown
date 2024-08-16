@@ -36,7 +36,9 @@ public class UserValueRaw {
 
     public UserValue toCooked() {
         var userValueType = UserValueType.fromDbValue(type);
-        return new UserValue(userValueType.convertString(value));
+        var convertedValue = userValueType == null ? null :
+                userValueType.convertString(value);
+        return new UserValue(convertedValue);
     }
 
     @NonNull

@@ -4,6 +4,8 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModel;
 
+import java.util.Optional;
+
 import javax.inject.Inject;
 
 import dagger.hilt.android.lifecycle.HiltViewModel;
@@ -20,11 +22,14 @@ public class UsernameViewModel extends ViewModel {
     @Inject
     public UsernameViewModel(UserValueDao userValueDao) {
         usernameRawLive = userValueDao.getUserValueLive(UserValueKeys.USERNAME.getKey());
+
     }
 
     @SuppressWarnings("unchecked")
     public LiveData<UserValue<String>> getUsernameLive() {
         return Transformations.map(usernameRawLive,
-                userValueRaw -> (UserValue<String>) userValueRaw.toCooked());
+                userValueRaw -> Optional.ofNullable(userValueRaw)
+                        .map(userVal -> (UserValue<String>) userVal.toCooked())
+                        .orElse(null));
     }
 }

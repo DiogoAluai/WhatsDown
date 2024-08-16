@@ -32,6 +32,7 @@ import dagger.hilt.android.AndroidEntryPoint;
 import daluai.app.whatsdown.R;
 import daluai.app.whatsdown.data.manager.UserValueKeys;
 import daluai.app.whatsdown.data.manager.UserValueManager;
+import daluai.app.whatsdown.ui.pickusername.PickUsernameActivity;
 import daluai.lib.network_utils.LocalIpProbe;
 
 @AndroidEntryPoint
@@ -62,8 +63,9 @@ public class MainActivity extends AppCompatActivity {
         initializeViewModel();
         initializeComponents();
 
-        //todo: always lunch username picker activity when username is null
-//        launchUsernameActivityIfUserNull();
+        if (usernameViewModel.getUsernameLive() == null) {
+            launchUsernameActivity();
+        }
         setObserverForUsernameTitle();
         registerAndStartServiceDiscovery();
     }
@@ -83,12 +85,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setObserverForUsernameTitle() {
-        usernameViewModel.getUsernameLive().observe(this, stringUserValue -> {
-            String usernameValue = stringUserValue.getValue();
-            usernameTitle.setText(usernameValue);
+        usernameViewModel.getUsernameLive().observe(this, username -> {
+            String usernameString = username.getValue();
+            if (usernameString == null) {
+                usernameTitle.setText("Set username");
+                return;
+            }
+            usernameTitle.setText(usernameString);
                 executor.execute(() -> {
                     jmdns.unregisterAllServices();
-                    tryRegisterMyWhatsDownService(usernameValue);
+                    tryRegisterMyWhatsDownService(usernameString);
                 });
         });
     }
@@ -147,6 +153,10 @@ public class MainActivity extends AppCompatActivity {
 
     private void tryRegisterMyWhatsDownService(String username) {
         try {
+            if (username == null) {
+                LOG.w("Skipping jmdsn registering, as provided username is null");
+                return;
+            }
             jmdns.registerService(createMyWhatsDownService(username));
         } catch (IOException e) {
             LOG.e("Error registering my service", e);
