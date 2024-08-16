@@ -17,6 +17,11 @@ public class MessageManagerImpl implements MessageManager {
     @Inject
     MessageDao messageDao;
 
+    @Inject
+    public MessageManagerImpl(MessageDao messageDao) {
+        this.messageDao = messageDao;
+    }
+
     @Override
     public List<Message> getMessages(String user) {
         return Optional.ofNullable(messageDao.loadMessagesOfUser(user))

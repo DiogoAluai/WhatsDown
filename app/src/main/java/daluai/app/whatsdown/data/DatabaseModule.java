@@ -13,7 +13,7 @@ import daluai.app.whatsdown.data.dao.UserValueDao;
 
 /**
  * Database module for dao injection.
- * The component used in 'InstallIn' annotation is will determine to which classes the bindings are visible.
+ * The component used in 'InstallIn' annotation will determine to which classes the bindings are visible.
  * 'SingletonComponent' is used for whole Application.
  */
 @Module

@@ -15,6 +15,6 @@ public abstract class MessageModule {
     @Binds
     @Singleton
     @SuppressWarnings("unused")
-    public abstract MessageManager bindUserValueManager(MessageManagerImpl impl);
+    public abstract MessageManager bindMessageManager(MessageManagerImpl impl);
 
 }
