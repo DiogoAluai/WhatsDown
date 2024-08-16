@@ -19,7 +19,7 @@ public class WhatsDownServiceListener implements ServiceListener {
 
     private static final Logger LOG = Logger.ofClass(WhatsDownServiceListener.class);
 
-    private final ArrayList<String> serviceList;
+    private final ArrayList<ServiceInfo> serviceList;
     private final DeviceAdapter deviceAdapter;
 
     public WhatsDownServiceListener(Context context) {
@@ -52,19 +52,27 @@ public class WhatsDownServiceListener implements ServiceListener {
         UiUtils.runCallbackOnMainThread(this::addServiceIfNotPresent, serviceInfo);
     }
 
-    private void addServiceIfNotPresent(ServiceInfo serviceInfo) {
-        String username = serviceInfo.getPropertyString(PROP_USER_ALIAS);
-        if (!isWhatsDownService(serviceInfo) || serviceList.contains(username)) {
-            return;
-        }
-        serviceList.add(username);
-        deviceAdapter.notifyDataSetChanged();
-    }
-
     private void logServiceInfo(ServiceInfo serviceInfo) {
         LOG.i(" - Service type: " + serviceInfo.getType());
         LOG.i(" - Service subtype: " + serviceInfo.getSubtype());
         LOG.i(" - WhatsDown property: " + serviceInfo.getPropertyString(PROP_WHATS_DOWN));
+    }
+
+    private void addServiceIfNotPresent(ServiceInfo serviceInfo) {
+        if (isServiceAdded(serviceInfo) || !isWhatsDownService(serviceInfo)) {
+            LOG.i("Skipping service registration for " + serviceInfo);
+            return;
+        }
+        LOG.i("Adding service " + serviceInfo);
+        serviceList.add(serviceInfo);
+        deviceAdapter.notifyDataSetChanged();
+    }
+
+    private boolean isServiceAdded(ServiceInfo serviceInfo) {
+        return serviceList.stream()
+                .map(info -> info.getPropertyString(PROP_USER_ALIAS))
+                .anyMatch(registeredServiceName ->
+                        registeredServiceName.equals(serviceInfo.getPropertyString(PROP_USER_ALIAS)));
     }
 
     private boolean isWhatsDownService(ServiceInfo serviceInfo) {

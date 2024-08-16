@@ -1,6 +1,10 @@
 package daluai.app.whatsdown.ui.main;
 
+import static daluai.app.whatsdown.ui.ActivityApi.INTENT_MESSAGE_SERVICE_IP;
+import static daluai.app.whatsdown.ui.WhatsDownConstants.PROP_USER_ALIAS;
+
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,12 +15,20 @@ import androidx.annotation.NonNull;
 
 import java.util.ArrayList;
 
-public class DeviceAdapter extends ArrayAdapter<String> {
-    private final Context context;
-    private final ArrayList<String> services;
+import javax.jmdns.ServiceInfo;
 
-    public DeviceAdapter(Context context, ArrayList<String> services) {
+import daluai.app.sdk_boost.wrapper.ToastHandler;
+import daluai.app.whatsdown.ui.message.MessageActivity;
+
+public class DeviceAdapter extends ArrayAdapter<ServiceInfo> {
+
+    private final ToastHandler toastHandler;
+    private final Context context;
+    private final ArrayList<ServiceInfo> services;
+
+    public DeviceAdapter(Context context, ArrayList<ServiceInfo> services) {
         super(context, 0, services);
+        this.toastHandler = new ToastHandler(context);
         this.context = context;
         this.services = services;
     }
@@ -28,10 +40,19 @@ public class DeviceAdapter extends ArrayAdapter<String> {
             convertView = LayoutInflater.from(context).inflate(android.R.layout.simple_list_item_1, parent, false);
         }
 
-        String service = services.get(position);
+        ServiceInfo serviceInfo = services.get(position);
+        String username = serviceInfo.getPropertyString(PROP_USER_ALIAS);
         TextView serviceName = convertView.findViewById(android.R.id.text1);
-        serviceName.setText(service);
+        serviceName.setText(username);
+
+        convertView.setOnClickListener(view -> startMessageActivity(serviceInfo));
 
         return convertView;
+    }
+
+    private void startMessageActivity(ServiceInfo service) {
+        Intent intent = new Intent(context, MessageActivity.class);
+        intent.putExtra(INTENT_MESSAGE_SERVICE_IP, service.getInet4Addresses()[0].getHostAddress());
+        context.startActivity(intent);
     }
 }

@@ -24,6 +24,10 @@
             android:label="@string/title_activity_pick_username"
             android:theme="@style/Theme.WhatsDown" />
         <activity
+            android:name=".ui.message.MessageActivity"
+            android:exported="false"
+            android:theme="@style/Theme.WhatsDown" />
+        <activity
             android:name=".ui.main.MainActivity"
             android:exported="true"
             android:label="@string/app_name"
