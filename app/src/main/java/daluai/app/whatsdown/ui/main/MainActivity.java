@@ -1,9 +1,6 @@
 package daluai.app.whatsdown.ui.main;
 
 import static daluai.app.whatsdown.ui.ActivityApi.INTENT_EXTRA_USERNAME;
-import static daluai.app.whatsdown.ui.WhatsDownConstants.PROP_USER_ALIAS;
-import static daluai.app.whatsdown.ui.WhatsDownConstants.PROP_WHATS_DOWN;
-import static daluai.app.whatsdown.ui.WhatsDownConstants.WHATS_DOWN_UP;
 import static daluai.app.whatsdown.ui.WhatsDownConstants.createMyWhatsDownService;
 
 import android.content.Intent;
@@ -11,21 +8,16 @@ import android.os.Bundle;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 import javax.inject.Inject;
 import javax.jmdns.JmDNS;
-import javax.jmdns.ServiceEvent;
-import javax.jmdns.ServiceInfo;
-import javax.jmdns.ServiceListener;
 
 import dagger.hilt.android.AndroidEntryPoint;
 import daluai.app.sdk_boost.wrapper.LazyView;
@@ -46,8 +38,8 @@ public class MainActivity extends AppCompatActivity {
     private static final Logger LOG = Logger.ofClass(MainActivity.class);
     private static final Executor EXECUTOR = Executors.newSingleThreadExecutor();
 
-    private final LazyViewFactory lazyViewFactory;
     private final LazyView<TextView> usernameTitle;
+    private final LazyView<ListView> listView;
 
     @Inject
     UserValueManager userValueManager;
@@ -55,22 +47,23 @@ public class MainActivity extends AppCompatActivity {
     private ToastHandler toastHandler;
     private UsernameViewModel usernameViewModel;
 
-    private ArrayList<String> serviceList;
-    private DeviceAdapter deviceAdapter;
     private JmDNS jmdns;
+    private WhatsDownServiceListener whatsDownServiceListener;
 
     // todo: when list is empty there's a weird horizontal line on the UI
 
     public MainActivity() {
         super(R.layout.activity_main);
-        lazyViewFactory = new LazyViewFactory(this);
+        var lazyViewFactory = new LazyViewFactory(this);
         usernameTitle = lazyViewFactory.createView(R.id.mainUsernameTitleLabel);
+        listView = lazyViewFactory.createView(R.id.device_list_view);
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         toastHandler = new ToastHandler(this);
+        whatsDownServiceListener = new WhatsDownServiceListener(this);
         LOG.i("Creating Main Activity");
         initializeViewModel();
         initializeComponents();
@@ -88,12 +81,8 @@ public class MainActivity extends AppCompatActivity {
 
     private void initializeComponents() {
         usernameTitle.get().setOnClickListener(view -> launchUsernameActivity());
-
-        ListView listView = findViewById(R.id.device_list_view);
-        serviceList = new ArrayList<>();
-        deviceAdapter = new DeviceAdapter(this, serviceList);
-        listView.setAdapter(deviceAdapter);
-    }
+        listView.get().setAdapter(whatsDownServiceListener.getDeviceAdapter());
+   }
 
     private void setObserverForUsernameTitle() {
         usernameViewModel.getUsernameLive().observe(this, username -> {
@@ -146,7 +135,7 @@ public class MainActivity extends AppCompatActivity {
                 toastHandler.showToast("Failed to initialize device listener");
                 return;
             }
-            jmdns.addServiceListener("_http._tcp.local.", getWhatsDownServiceListener());
+            jmdns.addServiceListener("_http._tcp.local.", whatsDownServiceListener);
             registerOurWhatsDownService();
         });
     }
@@ -170,59 +159,6 @@ public class MainActivity extends AppCompatActivity {
             toastHandler.showToast("Failed to register to mDNS");
             LOG.e("Error registering my service", e);
         }
-    }
-
-    @NonNull
-    private ServiceListener getWhatsDownServiceListener() {
-        return new ServiceListener() {
-            @Override
-            public void serviceAdded(ServiceEvent event) {
-                // Only add in resolved method, as we need to verify the properties. There
-                //are only available after resolution.
-            }
-
-            @Override
-            public void serviceRemoved(ServiceEvent event) {
-                ServiceInfo serviceInfo = event.getInfo();
-                String serviceName = serviceInfo.getName();
-                LOG.i("Removing service from list " + serviceInfo);
-                runOnUiThread(() -> {
-                    serviceList.remove(serviceName);
-                    deviceAdapter.notifyDataSetChanged();
-                });
-            }
-
-            @Override
-            public void serviceResolved(ServiceEvent event) {
-                ServiceInfo serviceInfo = event.getInfo();
-                LOG.i("Adding service to list: " + serviceInfo);
-                logServiceInfo(serviceInfo);
-                runOnUiThread(() -> addServiceIfNotPresent(serviceInfo));
-            }
-
-            private void addServiceIfNotPresent(ServiceInfo serviceInfo) {
-                String username = serviceInfo.getPropertyString(PROP_USER_ALIAS);
-                if (!isWhatsDownService(serviceInfo) || serviceList.contains(username)) {
-                    return;
-                }
-                serviceList.add(username);
-                deviceAdapter.notifyDataSetChanged();
-            }
-        };
-    }
-
-    private void logServiceInfo(ServiceInfo serviceInfo) {
-        LOG.i(" - Service type: " + serviceInfo.getType());
-        LOG.i(" - Service subtype: " + serviceInfo.getSubtype());
-        LOG.i(" - WhatsDown property: " + serviceInfo.getPropertyString(PROP_WHATS_DOWN));
-    }
-
-    private boolean isWhatsDownService(ServiceInfo serviceInfo) {
-        if (serviceInfo == null) {
-            return false;
-        }
-        String whatsDownValue = serviceInfo.getPropertyString(PROP_WHATS_DOWN);
-        return whatsDownValue != null && whatsDownValue.equals(WHATS_DOWN_UP);
     }
 
     @Override
