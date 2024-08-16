@@ -28,6 +28,8 @@ import javax.jmdns.ServiceInfo;
 import javax.jmdns.ServiceListener;
 
 import dagger.hilt.android.AndroidEntryPoint;
+import daluai.app.sdk_boost.wrapper.LazyView;
+import daluai.app.sdk_boost.wrapper.LazyViewFactory;
 import daluai.app.sdk_boost.wrapper.Logger;
 import daluai.app.sdk_boost.wrapper.ToastHandler;
 import daluai.app.whatsdown.R;
@@ -44,6 +46,9 @@ public class MainActivity extends AppCompatActivity {
     private static final Logger LOG = Logger.ofClass(MainActivity.class);
     private static final Executor EXECUTOR = Executors.newSingleThreadExecutor();
 
+    private final LazyViewFactory lazyViewFactory;
+    private final LazyView<TextView> usernameTitle;
+
     @Inject
     UserValueManager userValueManager;
 
@@ -53,16 +58,20 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<String> serviceList;
     private DeviceAdapter deviceAdapter;
     private JmDNS jmdns;
-    private TextView usernameTitle;
 
     // todo: when list is empty there's a weird horizontal line on the UI
+
+    public MainActivity() {
+        super(R.layout.activity_main);
+        lazyViewFactory = new LazyViewFactory(this);
+        usernameTitle = lazyViewFactory.createView(R.id.mainUsernameTitleLabel);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         toastHandler = new ToastHandler(this);
         LOG.i("Creating Main Activity");
-        setContentView(R.layout.activity_main);
         initializeViewModel();
         initializeComponents();
 
@@ -78,8 +87,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initializeComponents() {
-        usernameTitle = findViewById(R.id.mainUsernameTitleLabel);
-        usernameTitle.setOnClickListener(view -> launchUsernameActivity());
+        usernameTitle.get().setOnClickListener(view -> launchUsernameActivity());
 
         ListView listView = findViewById(R.id.device_list_view);
         serviceList = new ArrayList<>();
@@ -91,10 +99,10 @@ public class MainActivity extends AppCompatActivity {
         usernameViewModel.getUsernameLive().observe(this, username -> {
             String usernameString = username.getValue();
             if (usernameString == null) {
-                usernameTitle.setText("Set username");
+                usernameTitle.get().setText("Set username");
                 return;
             }
-            usernameTitle.setText(usernameString);
+            usernameTitle.get().setText(usernameString);
                 EXECUTOR.execute(() -> {
                     jmdns.unregisterAllServices();
                     tryRegisterMyWhatsDownService(usernameString);
