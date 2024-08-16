@@ -8,6 +8,7 @@ import dagger.Module;
 import dagger.Provides;
 import dagger.hilt.InstallIn;
 import dagger.hilt.components.SingletonComponent;
+import daluai.app.whatsdown.data.dao.MessageDao;
 import daluai.app.whatsdown.data.dao.UserValueDao;
 
 /**
@@ -32,5 +33,11 @@ public class DatabaseModule {
     @Singleton
     public static UserValueDao provideExpenseDao(AppDatabase database) {
         return database.userValueDao();
+    }
+
+    @Provides
+    @Singleton
+    public static MessageDao provideMessageDao(AppDatabase database) {
+        return database.messageDao();
     }
 }
