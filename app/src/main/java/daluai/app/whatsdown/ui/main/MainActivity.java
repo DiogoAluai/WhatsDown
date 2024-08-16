@@ -64,8 +64,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         toastHandler = new ToastHandler(this);
         whatsDownServiceListener = new WhatsDownServiceListener(this);
-        LOG.i("Creating Main Activity");
-        initializeViewModel();
+        usernameViewModel = new ViewModelProvider(this).get(UsernameViewModel.class);
+
         initializeComponents();
 
         if (usernameViewModel.getUsernameLive() == null) {
@@ -75,14 +75,16 @@ public class MainActivity extends AppCompatActivity {
         registerAndStartServiceDiscovery();
     }
 
-    private void initializeViewModel() {
-        usernameViewModel = new ViewModelProvider(this).get(UsernameViewModel.class);
-    }
-
     private void initializeComponents() {
         usernameTitle.get().setOnClickListener(view -> launchUsernameActivity());
         listView.get().setAdapter(whatsDownServiceListener.getDeviceAdapter());
    }
+
+    private void launchUsernameActivity() {
+        LOG.i("Launching username picker activity.");
+        Intent intent = new Intent(this, PickUsernameActivity.class);
+        startActivityForResult(intent, REQUEST_USERNAME_CODE);
+    }
 
     private void setObserverForUsernameTitle() {
         usernameViewModel.getUsernameLive().observe(this, username -> {
@@ -97,12 +99,6 @@ public class MainActivity extends AppCompatActivity {
                     tryRegisterMyWhatsDownService(usernameString);
                 });
         });
-    }
-
-    private void launchUsernameActivity() {
-        LOG.i("Launching username picker activity.");
-        Intent intent = new Intent(this, PickUsernameActivity.class);
-        startActivityForResult(intent, REQUEST_USERNAME_CODE);
     }
 
     @Override
