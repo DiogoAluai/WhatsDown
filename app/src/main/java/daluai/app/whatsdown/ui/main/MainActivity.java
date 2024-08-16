@@ -10,7 +10,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -30,6 +29,7 @@ import javax.jmdns.ServiceListener;
 
 import dagger.hilt.android.AndroidEntryPoint;
 import daluai.app.sdk_boost.wrapper.Logger;
+import daluai.app.sdk_boost.wrapper.ToastHandler;
 import daluai.app.whatsdown.R;
 import daluai.app.whatsdown.data.manager.UserValueKeys;
 import daluai.app.whatsdown.data.manager.UserValueManager;
@@ -42,11 +42,12 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_USERNAME_CODE = 1;
 
     private static final Logger LOG = Logger.ofClass(MainActivity.class);
-    private static final Executor executor = Executors.newSingleThreadExecutor();
+    private static final Executor EXECUTOR = Executors.newSingleThreadExecutor();
 
     @Inject
     UserValueManager userValueManager;
 
+    private ToastHandler toastHandler;
     private UsernameViewModel usernameViewModel;
 
     private ArrayList<String> serviceList;
@@ -59,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        toastHandler = new ToastHandler(this);
         LOG.i("Creating Main Activity");
         setContentView(R.layout.activity_main);
         initializeViewModel();
@@ -93,7 +95,7 @@ public class MainActivity extends AppCompatActivity {
                 return;
             }
             usernameTitle.setText(usernameString);
-                executor.execute(() -> {
+                EXECUTOR.execute(() -> {
                     jmdns.unregisterAllServices();
                     tryRegisterMyWhatsDownService(usernameString);
                 });
@@ -112,15 +114,13 @@ public class MainActivity extends AppCompatActivity {
 
         if (requestCode != REQUEST_USERNAME_CODE) {
             LOG.e("Received unrecognizable activity request code: " + requestCode);
-            Toast.makeText(getApplicationContext(), "Something went wrong, please restart the app.", Toast.LENGTH_LONG)
-                    .show();
+            toastHandler.showToast("Something went wrong, please restart the app.");
             return;
         }
 
         if (resultCode != RESULT_OK || data == null) {
             LOG.e("Username picking activity went wrong. Result code: " + resultCode);
-            Toast.makeText(getApplicationContext(), "Something went wrong, please restart the app.", Toast.LENGTH_LONG)
-                    .show();
+            toastHandler.showToast("Something went wrong, please restart the app.");
             return;
         }
 
@@ -130,13 +130,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void registerAndStartServiceDiscovery() {
-        executor.execute(() -> {
+        EXECUTOR.execute(() -> {
             try {
                 jmdns = JmDNS.create(LocalIpProbe.firstActiveIPv4Interface().getInetAddress());
             } catch (IOException e) {
                 LOG.e("Could not create jmdns", e);
-                Toast.makeText(getApplicationContext(), "Failed to initialize device listener", Toast.LENGTH_LONG)
-                        .show();
+                toastHandler.showToast("Failed to initialize device listener");
                 return;
             }
             jmdns.addServiceListener("_http._tcp.local.", getWhatsDownServiceListener());
@@ -160,6 +159,7 @@ public class MainActivity extends AppCompatActivity {
             }
             jmdns.registerService(createMyWhatsDownService(username));
         } catch (IOException e) {
+            toastHandler.showToast("Failed to register to mDNS");
             LOG.e("Error registering my service", e);
         }
     }
@@ -201,19 +201,6 @@ public class MainActivity extends AppCompatActivity {
                 deviceAdapter.notifyDataSetChanged();
             }
         };
-    }
-
-    private String getUniqueUsername(String username) {
-        if (!serviceList.contains(username)) {
-            return username;
-        }
-
-        String newUsername;
-        int counter = 1;
-        do {
-            newUsername = username + "(" + counter + ")";
-        } while (serviceList.contains(newUsername));
-        return newUsername;
     }
 
     private void logServiceInfo(ServiceInfo serviceInfo) {

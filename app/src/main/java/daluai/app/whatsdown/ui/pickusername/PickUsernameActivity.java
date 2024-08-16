@@ -8,7 +8,6 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -16,6 +15,7 @@ import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
 import daluai.app.sdk_boost.wrapper.Logger;
+import daluai.app.sdk_boost.wrapper.ToastHandler;
 import daluai.app.whatsdown.R;
 import daluai.app.whatsdown.data.manager.UserValueKeys;
 import daluai.app.whatsdown.data.manager.UserValueManager;
@@ -32,10 +32,12 @@ public class PickUsernameActivity extends AppCompatActivity {
 
     private Button button;
     private EditText usernameInput;
+    private ToastHandler toastHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        toastHandler = new ToastHandler(this);
         setContentView(R.layout.activity_username);
         initializeComponents();
         addTextChangedListener();
@@ -78,8 +80,7 @@ public class PickUsernameActivity extends AppCompatActivity {
             String usernameInputString = usernameInput.getText().toString();
             LOG.i("Username input: " + usernameInputString);
             if (isUsernameInputInvalid(usernameInputString)) {
-                Toast.makeText(getApplicationContext(), "Invalid username", Toast.LENGTH_SHORT)
-                        .show();
+                toastHandler.showToast("Invalid username");
                 return;
             }
             Intent resultIntent = new Intent();
