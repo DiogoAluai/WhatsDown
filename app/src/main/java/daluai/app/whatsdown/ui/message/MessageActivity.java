@@ -1,8 +1,8 @@
 package daluai.app.whatsdown.ui.message;
 
 import static daluai.app.whatsdown.ui.ActivityApi.INTENT_MESSAGE_SERVICE_IP;
-import static daluai.app.whatsdown.ui.message.MessagingUtils.getMessageSocketListener;
-import static daluai.app.whatsdown.ui.message.MessagingUtils.sendMessage;
+import static daluai.app.whatsdown.ui.MessagingUtils.getMessageSocketListener;
+import static daluai.app.whatsdown.ui.MessagingUtils.sendMessage;
 
 import android.os.Bundle;
 import android.view.View;

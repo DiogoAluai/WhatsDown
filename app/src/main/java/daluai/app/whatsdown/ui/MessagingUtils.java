@@ -1,4 +1,4 @@
-package daluai.app.whatsdown.ui.message;
+package daluai.app.whatsdown.ui;
 
 import static daluai.app.whatsdown.ui.WhatsDownConstants.WHATS_DOWN_MESSAGING_PORT;
 
@@ -17,7 +17,7 @@ public final class MessagingUtils {
 
     private static final Logger LOG = Logger.ofClass(MessagingUtils.class);
 
-    static Runnable getMessageSocketListener(ToastHandler toastHandler,
+    public static Runnable getMessageSocketListener(ToastHandler toastHandler,
                                              Consumer<String> messageConsumer) {
         return () -> {
             try (var serverSocket = new ServerSocket(WHATS_DOWN_MESSAGING_PORT)) {
@@ -32,7 +32,7 @@ public final class MessagingUtils {
         };
     }
 
-    static void handleIncomingMessage(Socket socket, Consumer<String> messageConsumer) throws IOException {
+    public static void handleIncomingMessage(Socket socket, Consumer<String> messageConsumer) throws IOException {
         var inputStream = socket.getInputStream();
         byte[] buffer = new byte[1024];
         int bytesRead = inputStream.read(buffer);
@@ -42,7 +42,7 @@ public final class MessagingUtils {
         messageConsumer.accept(response);
     }
 
-    static void sendMessage(String targetIp, byte[] bytesToSend) {
+    public static void sendMessage(String targetIp, byte[] bytesToSend) {
         try (Socket socket = new Socket(targetIp, WHATS_DOWN_MESSAGING_PORT)) {
             var outputStream = socket.getOutputStream();
             outputStream.write(bytesToSend);
