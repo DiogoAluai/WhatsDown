@@ -22,7 +22,6 @@ public class UsernameViewModel extends ViewModel {
     @Inject
     public UsernameViewModel(UserValueDao userValueDao) {
         usernameRawLive = userValueDao.getUserValueLive(UserValueKeys.USERNAME.getKey());
-
     }
 
     @SuppressWarnings("unchecked")

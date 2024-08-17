@@ -12,4 +12,6 @@ public interface MessageManager {
 
     LiveData<List<Message>> getMessagesLive(String user);
 
+    void saveMessage(Message message);
+
 }

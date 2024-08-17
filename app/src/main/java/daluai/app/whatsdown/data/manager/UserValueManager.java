@@ -14,6 +14,11 @@ import daluai.app.whatsdown.data.manager.dto.UserValueKey;
 @Singleton
 public interface UserValueManager {
 
+    /**
+     * Cannot be ran on main thread
+     */
+    <T> UserValue<T> getUserValue(UserValueKey<T> userValueKey);
+
     <T> void getUserValue(UserValueKey<T> userValueKey, Consumer<UserValue<T>> callback);
 
     <T> void getUserValue(UserValueKey<T> userValueKey, Consumer<UserValue<T>> callback, boolean runParallel);

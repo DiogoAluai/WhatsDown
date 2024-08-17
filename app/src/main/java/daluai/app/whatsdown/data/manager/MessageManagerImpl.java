@@ -9,10 +9,13 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 
+import daluai.app.sdk_boost.wrapper.Logger;
 import daluai.app.whatsdown.data.dao.MessageDao;
 import daluai.app.whatsdown.data.model.Message;
 
 public class MessageManagerImpl implements MessageManager {
+
+    private static final Logger LOG = Logger.ofClass(MessageManagerImpl.class);
 
     @Inject
     MessageDao messageDao;
@@ -32,5 +35,11 @@ public class MessageManagerImpl implements MessageManager {
     public LiveData<List<Message>> getMessagesLive(String user) {
         return Optional.ofNullable(messageDao.loadMessagesOfUserLive(user))
                 .orElse(new MutableLiveData<>(Collections.emptyList()));
+    }
+
+    @Override
+    public void saveMessage(Message message) {
+        LOG.i("Saving message: " + message);
+        messageDao.insert(message);
     }
 }

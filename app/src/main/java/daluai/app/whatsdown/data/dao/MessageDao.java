@@ -18,7 +18,7 @@ public interface MessageDao {
     @Query("SELECT * FROM messages WHERE `user` == :user")
     List<Message> loadMessagesOfUser(String user);
 
-    @Query("SELECT * FROM messages WHERE `user` == :user")
+    @Query("SELECT * FROM messages WHERE `user` == :user ORDER BY `messageId`")
     LiveData<List<Message>> loadMessagesOfUserLive(String user);
 
     @Insert

@@ -28,6 +28,19 @@ public class UserValueManagerImpl implements UserValueManager {
     }
 
     @Override
+    public <T> UserValue<T> getUserValue(UserValueKey<T> userValueKey) {
+        var userValueRaw = userValueDao.loadById(userValueKey.getKey());
+        if (userValueRaw == null) {
+            userValueRaw = userValueKey.toRaw();
+            LOG.i("Did not find populated user value. Upserting and returning default.");
+            userValueDao.upsert(userValueRaw);
+        } else {
+            LOG.i("Found user value: " + userValueRaw);
+        }
+        return userValueRaw.toCooked();
+    }
+
+    @Override
     public <T> void getUserValue(UserValueKey<T> userValueKey,
                                  Consumer<UserValue<T>> callback) {
         getUserValue(userValueKey, callback, true);
@@ -38,16 +51,14 @@ public class UserValueManagerImpl implements UserValueManager {
                                  Consumer<UserValue<T>> callback,
                                  boolean runParallel) {
         if (runParallel) {
-            executor.execute(() -> {
-                getUserValueOnThisThread(userValueKey, callback);
-            });
+            executor.execute(() -> getUserValueOnMainThread(userValueKey, callback));
         } else {
-            getUserValueOnThisThread(userValueKey, callback);
+            getUserValueOnMainThread(userValueKey, callback);
         }
     }
 
-    private <T> void getUserValueOnThisThread(UserValueKey<T> userValueKey,
-                                                  Consumer<UserValue<T>> callback) {
+    private <T> void getUserValueOnMainThread(UserValueKey<T> userValueKey,
+                                              Consumer<UserValue<T>> callback) {
         var userValueRaw = userValueDao.loadById(userValueKey.getKey());
         if (userValueRaw == null) {
             userValueRaw = userValueKey.toRaw();
@@ -57,7 +68,7 @@ public class UserValueManagerImpl implements UserValueManager {
             LOG.i("Found user value: " + userValueRaw);
         }
         UserValue<T> userValueCooked = userValueRaw.toCooked();
-
+        // Note: this does not look right, but I'm afraid to change it
         UiUtils.runCallbackOnMainThread(callback, userValueCooked);
     }
 

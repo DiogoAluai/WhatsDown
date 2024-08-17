@@ -1,6 +1,7 @@
 package daluai.app.whatsdown.ui.main;
 
 import static daluai.app.whatsdown.ui.ActivityApi.INTENT_MESSAGE_SERVICE_IP;
+import static daluai.app.whatsdown.ui.ActivityApi.INTENT_MESSAGE_USER;
 import static daluai.app.whatsdown.ui.WhatsDownConstants.PROP_USER_ALIAS;
 
 import android.content.Context;
@@ -51,8 +52,11 @@ public class DeviceAdapter extends ArrayAdapter<ServiceInfo> {
     }
 
     private void startMessageActivity(ServiceInfo service) {
+        String username = service.getPropertyString(PROP_USER_ALIAS);
+
         Intent intent = new Intent(context, MessageActivity.class);
         intent.putExtra(INTENT_MESSAGE_SERVICE_IP, service.getInet4Addresses()[0].getHostAddress());
+        intent.putExtra(INTENT_MESSAGE_USER, username);
         context.startActivity(intent);
     }
 }

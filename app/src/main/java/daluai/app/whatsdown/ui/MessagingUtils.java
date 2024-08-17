@@ -9,6 +9,7 @@ import java.util.function.Consumer;
 
 import daluai.app.sdk_boost.wrapper.Logger;
 import daluai.app.sdk_boost.wrapper.ToastHandler;
+import daluai.app.whatsdown.MessageNetworkPacket;
 
 public final class MessagingUtils {
 
@@ -17,8 +18,8 @@ public final class MessagingUtils {
 
     private static final Logger LOG = Logger.ofClass(MessagingUtils.class);
 
-    public static Runnable getMessageSocketListener(ToastHandler toastHandler,
-                                             Consumer<String> messageConsumer) {
+    public static Runnable createMessageSocketListener(ToastHandler toastHandler,
+                                                       Consumer<MessageNetworkPacket> messageConsumer) {
         return () -> {
             try (var serverSocket = new ServerSocket(WHATS_DOWN_MESSAGING_PORT)) {
                 while (!Thread.currentThread().isInterrupted()) {
@@ -32,14 +33,19 @@ public final class MessagingUtils {
         };
     }
 
-    public static void handleIncomingMessage(Socket socket, Consumer<String> messageConsumer) throws IOException {
+    public static void handleIncomingMessage(Socket socket, Consumer<MessageNetworkPacket> messageConsumer) throws IOException {
         var inputStream = socket.getInputStream();
         byte[] buffer = new byte[1024];
         int bytesRead = inputStream.read(buffer);
         inputStream.close();
 
         String response = new String(buffer, 0, bytesRead);
-        messageConsumer.accept(response);
+        try {
+            MessageNetworkPacket messagePacket = MessageNetworkPacket.fromJson(response);
+            messageConsumer.accept(messagePacket);
+        } catch (Exception e) {
+            LOG.e("Failed to parse message packet, skipping consumer call", e);
+        }
     }
 
     public static void sendMessage(String targetIp, byte[] bytesToSend) {

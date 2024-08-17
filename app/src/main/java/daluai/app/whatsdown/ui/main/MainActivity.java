@@ -1,6 +1,7 @@
 package daluai.app.whatsdown.ui.main;
 
 import static daluai.app.whatsdown.ui.ActivityApi.INTENT_EXTRA_USERNAME;
+import static daluai.app.whatsdown.ui.MessagingUtils.createMessageSocketListener;
 import static daluai.app.whatsdown.ui.WhatsDownConstants.createMyWhatsDownService;
 
 import android.content.Intent;
@@ -13,7 +14,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
 import java.io.IOException;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import javax.inject.Inject;
@@ -28,6 +29,7 @@ import daluai.app.whatsdown.R;
 import daluai.app.whatsdown.data.manager.MessageManager;
 import daluai.app.whatsdown.data.manager.UserValueManager;
 import daluai.app.whatsdown.data.manager.dto.UserValueKeys;
+import daluai.app.whatsdown.data.model.Message;
 import daluai.app.whatsdown.ui.pickusername.PickUsernameActivity;
 import daluai.lib.network_utils.LocalIpProbe;
 
@@ -35,9 +37,10 @@ import daluai.lib.network_utils.LocalIpProbe;
 public class MainActivity extends AppCompatActivity {
 
     private static final int REQUEST_USERNAME_CODE = 1;
+    public static final int THREAD_POOL_COUNT = 2;
 
     private static final Logger LOG = Logger.ofClass(MainActivity.class);
-    private static final Executor EXECUTOR = Executors.newSingleThreadExecutor();
+    private static final ExecutorService EXECUTOR = Executors.newFixedThreadPool(THREAD_POOL_COUNT);
 
     private final LazyView<TextView> usernameTitle;
     private final LazyView<ListView> listView;
@@ -81,7 +84,12 @@ public class MainActivity extends AppCompatActivity {
 
         setObserverForUsernameTitle();
         registerAndStartServiceDiscovery();
+        setMessageSocketListener();
+    }
 
+    private void setMessageSocketListener() {
+        EXECUTOR.execute(createMessageSocketListener(toastHandler, message ->
+                messageManager.saveMessage(Message.fromReceivingPacket(message))));
     }
 
     private void initializeComponents() {
