@@ -80,9 +80,8 @@ public class MainActivity extends AppCompatActivity {
             if (userValue == null || userValue.getValue().equals(UserValueKeys.USERNAME.getDefaultValue())) {
                 // no username found, let's have the user pick one
                 launchUsernameActivity();
-                return;
             }
-            String username = userValue.getValue();
+            String username = userValue != null ? userValue.getValue() : UserValueKeys.USERNAME.getDefaultValue();
             whatsDownServiceListener = new WhatsDownServiceListener(this, username);
             listView.get().setAdapter(whatsDownServiceListener.getDeviceAdapter());
 

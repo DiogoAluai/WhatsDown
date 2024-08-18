@@ -14,6 +14,7 @@ import javax.jmdns.ServiceListener;
 
 import daluai.app.sdk_boost.wrapper.Logger;
 import daluai.app.sdk_boost.wrapper.UiUtils;
+import daluai.app.whatsdown.data.manager.dto.UserValueKeys;
 
 public class WhatsDownServiceListener implements ServiceListener {
 
@@ -65,7 +66,9 @@ public class WhatsDownServiceListener implements ServiceListener {
     }
 
     private void addServiceIfNotPresent(ServiceInfo serviceInfo) {
-        if (isServiceAdded(serviceInfo) || !isWhatsDownService(serviceInfo)) {
+        if (isServiceAdded(serviceInfo)
+                || !isWhatsDownService(serviceInfo)
+                || hasDefaultUsername(serviceInfo)) {
             LOG.i("Skipping service registration for " + serviceInfo);
             return;
         }
@@ -76,6 +79,12 @@ public class WhatsDownServiceListener implements ServiceListener {
         LOG.i("Adding service " + serviceInfo);
         serviceList.add(serviceInfo);
         deviceDiscoveryAdapter.notifyDataSetChanged();
+    }
+
+    private boolean hasDefaultUsername(ServiceInfo serviceInfo) {
+        String username = serviceInfo.getPropertyString(PROP_USER_ALIAS);
+        String defaultUsername = UserValueKeys.USERNAME.getDefaultValue();
+        return username != null && username.equals(defaultUsername);
     }
 
     private boolean isMyService(ServiceInfo serviceInfo) {
