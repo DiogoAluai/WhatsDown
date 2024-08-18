@@ -24,7 +24,8 @@ public class WhatsDownServiceListener implements ServiceListener {
 
     private final ArrayList<ServiceInfo> serviceList;
     private final DeviceDiscoveryAdapter deviceDiscoveryAdapter;
-    private final String myUsername;
+
+    private String myUsername;
 
     public WhatsDownServiceListener(Context context, String myUsername) {
         this.serviceList = new ArrayList<>();
@@ -44,7 +45,7 @@ public class WhatsDownServiceListener implements ServiceListener {
         String serviceName = serviceInfo.getName();
         LOG.i("Removing service from list " + serviceInfo);
         UiUtils.runCallbackOnMainThread(service -> {
-            serviceList.remove(service);
+            serviceList.removeIf(s -> s.getName().equals(service));
             deviceDiscoveryAdapter.notifyDataSetChanged();
         }, serviceName);
     }
@@ -99,5 +100,9 @@ public class WhatsDownServiceListener implements ServiceListener {
 
     public DeviceDiscoveryAdapter getDeviceAdapter() {
         return deviceDiscoveryAdapter;
+    }
+
+    public void setMyUsername(String username) {
+        this.myUsername = username;
     }
 }

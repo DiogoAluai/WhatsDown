@@ -101,6 +101,7 @@ public class MainActivity extends AppCompatActivity {
                 return;
             }
             String usernameString = username.getValue();
+            whatsDownServiceListener.setMyUsername(usernameString);
             usernameTitle.setText(usernameString);
                 EXECUTOR.execute(() -> {
                     jmdns.unregisterAllServices();
