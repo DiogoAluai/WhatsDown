@@ -18,20 +18,15 @@ import java.util.ArrayList;
 
 import javax.jmdns.ServiceInfo;
 
-import daluai.app.sdk_boost.wrapper.ToastHandler;
 import daluai.app.whatsdown.ui.message.MessageActivity;
 
 public class DeviceDiscoveryAdapter extends ArrayAdapter<ServiceInfo> {
 
-    private final ToastHandler toastHandler;
     private final Context context;
-    private final ArrayList<ServiceInfo> services;
 
     public DeviceDiscoveryAdapter(Context context, ArrayList<ServiceInfo> services) {
         super(context, 0, services);
-        this.toastHandler = new ToastHandler(context);
         this.context = context;
-        this.services = services;
     }
 
     @NonNull
@@ -41,7 +36,11 @@ public class DeviceDiscoveryAdapter extends ArrayAdapter<ServiceInfo> {
             convertView = LayoutInflater.from(context).inflate(android.R.layout.simple_list_item_1, parent, false);
         }
 
-        ServiceInfo serviceInfo = services.get(position);
+        ServiceInfo serviceInfo = getItem(position);
+        if (serviceInfo == null) {
+            return convertView;
+        }
+
         String username = serviceInfo.getPropertyString(PROP_USER_ALIAS);
         TextView serviceName = convertView.findViewById(android.R.id.text1);
         serviceName.setText(username);
