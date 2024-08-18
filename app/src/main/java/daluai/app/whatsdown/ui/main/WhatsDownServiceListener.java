@@ -20,11 +20,11 @@ public class WhatsDownServiceListener implements ServiceListener {
     private static final Logger LOG = Logger.ofClass(WhatsDownServiceListener.class);
 
     private final ArrayList<ServiceInfo> serviceList;
-    private final DeviceAdapter deviceAdapter;
+    private final DeviceDiscoveryAdapter deviceDiscoveryAdapter;
 
     public WhatsDownServiceListener(Context context) {
         serviceList = new ArrayList<>();
-        deviceAdapter = new DeviceAdapter(context, serviceList);
+        deviceDiscoveryAdapter = new DeviceDiscoveryAdapter(context, serviceList);
     }
 
     @Override
@@ -40,7 +40,7 @@ public class WhatsDownServiceListener implements ServiceListener {
         LOG.i("Removing service from list " + serviceInfo);
         UiUtils.runCallbackOnMainThread(service -> {
             serviceList.remove(service);
-            deviceAdapter.notifyDataSetChanged();
+            deviceDiscoveryAdapter.notifyDataSetChanged();
         }, serviceName);
     }
 
@@ -65,7 +65,7 @@ public class WhatsDownServiceListener implements ServiceListener {
         }
         LOG.i("Adding service " + serviceInfo);
         serviceList.add(serviceInfo);
-        deviceAdapter.notifyDataSetChanged();
+        deviceDiscoveryAdapter.notifyDataSetChanged();
     }
 
     private boolean isServiceAdded(ServiceInfo serviceInfo) {
@@ -83,7 +83,7 @@ public class WhatsDownServiceListener implements ServiceListener {
         return whatsDownValue != null && whatsDownValue.equals(WHATS_DOWN_UP);
     }
 
-    public DeviceAdapter getDeviceAdapter() {
-        return deviceAdapter;
+    public DeviceDiscoveryAdapter getDeviceAdapter() {
+        return deviceDiscoveryAdapter;
     }
 }

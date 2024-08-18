@@ -21,13 +21,13 @@ import javax.jmdns.ServiceInfo;
 import daluai.app.sdk_boost.wrapper.ToastHandler;
 import daluai.app.whatsdown.ui.message.MessageActivity;
 
-public class DeviceAdapter extends ArrayAdapter<ServiceInfo> {
+public class DeviceDiscoveryAdapter extends ArrayAdapter<ServiceInfo> {
 
     private final ToastHandler toastHandler;
     private final Context context;
     private final ArrayList<ServiceInfo> services;
 
-    public DeviceAdapter(Context context, ArrayList<ServiceInfo> services) {
+    public DeviceDiscoveryAdapter(Context context, ArrayList<ServiceInfo> services) {
         super(context, 0, services);
         this.toastHandler = new ToastHandler(context);
         this.context = context;
