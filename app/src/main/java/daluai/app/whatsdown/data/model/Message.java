@@ -21,28 +21,34 @@ public class Message {
     @NonNull
     public String messageText;
 
+    public boolean isMine;
+
     public Message() {
         user = "no user";
         messageText = "no message";
+        isMine = false;
     }
 
-     @Ignore
-    public Message(@NonNull String user, @NonNull String messageText) {
+    @Ignore
+    public Message(@NonNull String user, @NonNull String messageText, boolean isMine) {
         this.user = user;
         this.messageText = messageText;
+        this.isMine = isMine;
     }
 
     public static Message fromSendingPacket(MessageNetworkPacket message) {
         return new Message(
                 message.getUserTarget(),
-                message.getMessage()
+                message.getMessage(),
+                true
         );
     }
 
     public static Message fromReceivingPacket(MessageNetworkPacket message) {
         return new Message(
                 message.getUserOrigin(),
-                message.getMessage()
+                message.getMessage(),
+                false
         );
     }
 
@@ -51,14 +57,14 @@ public class Message {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Message message = (Message) o;
-        return messageId == message.messageId &&
-                Objects.equals(user, message.user) &&
-                Objects.equals(messageText, message.messageText);
+        return messageId == message.messageId && isMine == message.isMine
+                && Objects.equals(user, message.user)
+                && Objects.equals(messageText, message.messageText);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(messageId, user, messageText);
+        return Objects.hash(messageId, user, messageText, isMine);
     }
 
     @NonNull
@@ -68,6 +74,7 @@ public class Message {
                 "messageId='" + messageId + '\'' +
                 ", user='" + user + '\'' +
                 ", messageText='" + messageText + '\'' +
+                ", isMine='" + isMine + '\'' +
                 '}';
     }
 }

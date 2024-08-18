@@ -27,7 +27,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:ems="10"
-        android:inputType="text"
+        android:inputType="textCapSentences"
         android:hint="@string/usernameInputHint"
         android:textAlignment="center"
         app:layout_constraintVertical_bias="0.3"

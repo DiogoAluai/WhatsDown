@@ -105,11 +105,11 @@ public class MainActivity extends AppCompatActivity {
 
     private void setObserverForUsernameTitle() {
         usernameViewModel.getUsernameLive().observe(this, username -> {
-            String usernameString = username.getValue();
-            if (usernameString == null) {
+            if (username == null || username.getValue() == null) {
                 usernameTitle.get().setText("Set username");
                 return;
             }
+            String usernameString = username.getValue();
             usernameTitle.get().setText(usernameString);
                 EXECUTOR.execute(() -> {
                     jmdns.unregisterAllServices();

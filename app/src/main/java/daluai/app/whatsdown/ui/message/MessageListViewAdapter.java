@@ -11,6 +11,7 @@ import androidx.annotation.NonNull;
 
 import java.util.List;
 
+import daluai.app.whatsdown.R;
 import daluai.app.whatsdown.data.model.Message;
 
 public class MessageListViewAdapter extends ArrayAdapter<Message> {
@@ -24,16 +25,17 @@ public class MessageListViewAdapter extends ArrayAdapter<Message> {
     @Override
     public View getView(int position, View convertView, @NonNull ViewGroup parent) {
         Message message = getItem(position);
+        if (message == null) {
+            return convertView;
+        }
 
         if (convertView == null) {
-            convertView = LayoutInflater.from(getContext()).inflate(android.R.layout.simple_list_item_1, parent, false);
+            var layoutId = message.isMine ? R.layout.item_message_right : R.layout.item_message_left;
+            convertView = LayoutInflater.from(getContext()).inflate(layoutId, parent, false);
         }
 
-        TextView textView = (TextView) convertView.findViewById(android.R.id.text1);
-
-        if (message != null) {
-            textView.setText(message.messageText);
-        }
+        TextView textView = (TextView) convertView.findViewById(R.id.text_message);
+        textView.setText(message.messageText);
 
         return convertView;
     }

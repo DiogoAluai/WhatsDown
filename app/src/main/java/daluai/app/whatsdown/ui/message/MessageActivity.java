@@ -5,6 +5,7 @@ import static daluai.app.whatsdown.ui.ActivityApi.INTENT_MESSAGE_USER;
 import static daluai.app.whatsdown.ui.MessagingUtils.sendMessage;
 
 import android.os.Bundle;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
@@ -92,6 +93,21 @@ public class MessageActivity extends AppCompatActivity {
 
         EXECUTOR.execute(this::setMessagesListViewAdapter);
 
+        messageEditText.get().setOnFocusChangeListener((view, hasFocus) -> {
+            if (hasFocus) {
+                EXECUTOR.execute(() -> {
+                    try {
+                        // ~ wait for keyboard to come up, this will change scroll state
+                        Thread.sleep(300);
+                        scrollMessageListToBottom();
+                    } catch (InterruptedException e) {
+                        // ~ fail quietly, as it doesn't really matter if scroll fails
+                        LOG.w("Thread interrupted", e);
+                    }
+                });
+            }
+        });
+
         sendButton.get().setOnClickListener(createSendMessageOnClick());
     }
 
@@ -100,7 +116,8 @@ public class MessageActivity extends AppCompatActivity {
      */
     private void setMessagesListViewAdapter() {
         List<Message> startingMessages = messageManager.getMessages(messagingTargetUser);
-        messageListView.get().setAdapter(createMessageListViewAdapter(startingMessages));
+        UiUtils.runCallbackOnMainThread(() ->
+                messageListView.get().setAdapter(createMessageListViewAdapter(startingMessages)));
 
         Observer<List<Message>> messagesObserver = messages -> {
             messageListView.get().setAdapter(createMessageListViewAdapter(messages));
@@ -118,7 +135,7 @@ public class MessageActivity extends AppCompatActivity {
         var adapter = listView.getAdapter();
         int lastElementIndex = adapter.getCount() - 1;
         if (lastElementIndex > -1) {
-            listView.post(() -> listView.setSelection(lastElementIndex));
+            UiUtils.runCallbackOnMainThread(() -> listView.setSelection(lastElementIndex));
         }
     }
 
@@ -148,5 +165,11 @@ public class MessageActivity extends AppCompatActivity {
                 toastHandler.showToast("Could not send message");
             }
         });
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent event) {
+        UiUtils.clearFocusIfClickedAway(this, event, EditText.class);
+        return super.dispatchTouchEvent(event);
     }
 }
