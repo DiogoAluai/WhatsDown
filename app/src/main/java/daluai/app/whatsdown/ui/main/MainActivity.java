@@ -25,6 +25,7 @@ import daluai.app.sdk_boost.wrapper.LazyView;
 import daluai.app.sdk_boost.wrapper.LazyViewFactory;
 import daluai.app.sdk_boost.wrapper.Logger;
 import daluai.app.sdk_boost.wrapper.ToastHandler;
+import daluai.app.sdk_boost.wrapper.UiUtils;
 import daluai.app.whatsdown.R;
 import daluai.app.whatsdown.data.manager.MessageManager;
 import daluai.app.whatsdown.data.manager.UserValueManager;
@@ -42,7 +43,6 @@ public class MainActivity extends AppCompatActivity {
     private static final Logger LOG = Logger.ofClass(MainActivity.class);
     private static final ExecutorService EXECUTOR = Executors.newFixedThreadPool(THREAD_POOL_COUNT);
 
-    private final LazyView<TextView> usernameTitle;
     private final LazyView<ListView> listView;
 
     @Inject
@@ -62,7 +62,6 @@ public class MainActivity extends AppCompatActivity {
     public MainActivity() {
         super(R.layout.activity_main);
         var lazyViewFactory = new LazyViewFactory(this);
-        usernameTitle = lazyViewFactory.createView(R.id.mainUsernameTitleLabel);
         listView = lazyViewFactory.createView(R.id.device_list_view);
     }
 
@@ -70,52 +69,50 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         toastHandler = new ToastHandler(this);
-        whatsDownServiceListener = new WhatsDownServiceListener(this);
         usernameViewModel = new ViewModelProvider(this).get(UsernameViewModel.class);
 
-        initializeComponents();
+        initializeParallel();
+    }
 
-        userValueManager.getUserValue(UserValueKeys.USERNAME, userValue -> {
+    private void initializeParallel() {
+        EXECUTOR.execute(() -> {
+            var userValue = userValueManager.getUserValue(UserValueKeys.USERNAME);
             if (userValue == null || userValue.getValue().equals(UserValueKeys.USERNAME.getDefaultValue())) {
                 // no username found, let's have the user pick one
                 launchUsernameActivity();
+                return;
             }
+            String username = userValue.getValue();
+            whatsDownServiceListener = new WhatsDownServiceListener(this, username);
+            listView.get().setAdapter(whatsDownServiceListener.getDeviceAdapter());
+
+            registerAndStartServiceDiscovery();
+            runMessageSocketListener();
+            UiUtils.runCallbackOnMainThread(this::setObserverForUsernameTitle);
         });
-
-        setObserverForUsernameTitle();
-        registerAndStartServiceDiscovery();
-        setMessageSocketListener();
-    }
-
-    private void setMessageSocketListener() {
-        EXECUTOR.execute(createMessageSocketListener(message ->
-                messageManager.saveMessage(Message.fromReceivingPacket(message))));
-    }
-
-    private void initializeComponents() {
-        usernameTitle.get().setOnClickListener(view -> launchUsernameActivity());
-        listView.get().setAdapter(whatsDownServiceListener.getDeviceAdapter());
-   }
-
-    private void launchUsernameActivity() {
-        LOG.i("Launching username picker activity.");
-        Intent intent = new Intent(this, PickUsernameActivity.class);
-        startActivityForResult(intent, REQUEST_USERNAME_CODE);
     }
 
     private void setObserverForUsernameTitle() {
+        TextView usernameTitle = findViewById(R.id.mainUsernameTitleLabel);
+        usernameTitle.setOnClickListener(view -> launchUsernameActivity());
         usernameViewModel.getUsernameLive().observe(this, username -> {
             if (username == null || username.getValue() == null) {
-                usernameTitle.get().setText("Set username");
+                usernameTitle.setText("Set username");
                 return;
             }
             String usernameString = username.getValue();
-            usernameTitle.get().setText(usernameString);
+            usernameTitle.setText(usernameString);
                 EXECUTOR.execute(() -> {
                     jmdns.unregisterAllServices();
                     tryRegisterMyWhatsDownService(usernameString);
                 });
         });
+    }
+
+    private void launchUsernameActivity() {
+        LOG.i("Launching username picker activity.");
+        Intent intent = new Intent(this, PickUsernameActivity.class);
+        startActivityForResult(intent, REQUEST_USERNAME_CODE);
     }
 
     @Override
@@ -154,7 +151,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void registerOurWhatsDownService() {
-        LOG.i("Registering to mDns service");
+        LOG.i("Registering to mDns");
         // already in a parallel thread, db queries are fine
         userValueManager.getUserValue(UserValueKeys.USERNAME, usernameValue ->
                 tryRegisterMyWhatsDownService(usernameValue.getValue()),
@@ -172,6 +169,11 @@ public class MainActivity extends AppCompatActivity {
             toastHandler.showToast("Failed to register to mDNS");
             LOG.e("Error registering my service", e);
         }
+    }
+
+    private void runMessageSocketListener() {
+        EXECUTOR.execute(createMessageSocketListener(message ->
+                messageManager.saveMessage(Message.fromReceivingPacket(message))));
     }
 
     @Override

@@ -17,14 +17,19 @@ import daluai.app.sdk_boost.wrapper.UiUtils;
 
 public class WhatsDownServiceListener implements ServiceListener {
 
+    // Debugging option to show self in the devices list. You can send message to yourself!
+    private static final boolean SHOW_SELF = false;
+
     private static final Logger LOG = Logger.ofClass(WhatsDownServiceListener.class);
 
     private final ArrayList<ServiceInfo> serviceList;
     private final DeviceDiscoveryAdapter deviceDiscoveryAdapter;
+    private final String myUsername;
 
-    public WhatsDownServiceListener(Context context) {
-        serviceList = new ArrayList<>();
-        deviceDiscoveryAdapter = new DeviceDiscoveryAdapter(context, serviceList);
+    public WhatsDownServiceListener(Context context, String myUsername) {
+        this.serviceList = new ArrayList<>();
+        this.deviceDiscoveryAdapter = new DeviceDiscoveryAdapter(context, serviceList);
+        this.myUsername = myUsername;
     }
 
     @Override
@@ -63,9 +68,18 @@ public class WhatsDownServiceListener implements ServiceListener {
             LOG.i("Skipping service registration for " + serviceInfo);
             return;
         }
+        if (isMyService(serviceInfo) && !SHOW_SELF) {
+            LOG.i("Skipping service registration for my own service: " + serviceInfo);
+            return;
+        }
         LOG.i("Adding service " + serviceInfo);
         serviceList.add(serviceInfo);
         deviceDiscoveryAdapter.notifyDataSetChanged();
+    }
+
+    private boolean isMyService(ServiceInfo serviceInfo) {
+        String username = serviceInfo.getPropertyString(PROP_USER_ALIAS);
+        return username != null && username.equals(myUsername);
     }
 
     private boolean isServiceAdded(ServiceInfo serviceInfo) {
