@@ -12,7 +12,7 @@ import daluai.app.whatsdown.data.dao.UserValueDao;
 import daluai.app.whatsdown.data.model.Message;
 import daluai.app.whatsdown.data.model.UserValueRaw;
 
-@Database(entities = {UserValueRaw.class, Message.class}, version = 5, exportSchema = false)
+@Database(entities = {UserValueRaw.class, Message.class}, version = 6, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
 
     private static volatile AppDatabase INSTANCE;
