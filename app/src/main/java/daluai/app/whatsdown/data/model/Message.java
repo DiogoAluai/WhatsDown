@@ -5,6 +5,8 @@ import androidx.room.Entity;
 import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
+import java.util.Objects;
+
 import daluai.app.whatsdown.MessageNetworkPacket;
 
 @Entity(tableName = "messages")
@@ -42,6 +44,21 @@ public class Message {
                 message.getUserOrigin(),
                 message.getMessage()
         );
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Message message = (Message) o;
+        return messageId == message.messageId &&
+                Objects.equals(user, message.user) &&
+                Objects.equals(messageText, message.messageText);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(messageId, user, messageText);
     }
 
     @NonNull

@@ -6,17 +6,21 @@ import static daluai.app.whatsdown.ui.MessagingUtils.sendMessage;
 
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import org.json.JSONException;
 
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -45,9 +49,10 @@ public class MessageActivity extends AppCompatActivity {
 
     private static final ExecutorService EXECUTOR = Executors.newFixedThreadPool(THREAD_POOL_COUNT);
 
-    private final LazyView<TextView> feedbackTextView;
+    private final LazyView<TextView> messageTargetTitle;
+    private final LazyView<ListView> messageListView;
     private final LazyView<EditText> messageEditText;
-    private final LazyView<Button> sendButton;
+    private final LazyView<ImageButton> sendButton;
 
     @Inject
     MessageManager messageManager;
@@ -63,29 +68,63 @@ public class MessageActivity extends AppCompatActivity {
     public MessageActivity() {
         super(R.layout.activity_message);
         var lazyViewFactory = new LazyViewFactory(this);
-        feedbackTextView = lazyViewFactory.createView(R.id.feedback);
-        messageEditText = lazyViewFactory.createView(R.id.messageEditText);
-        sendButton = lazyViewFactory.createView(R.id.sendButton);
+        this.messageTargetTitle = lazyViewFactory.createView(R.id.messageTargetTitle);
+        this.messageListView = lazyViewFactory.createView(R.id.messageListView);
+        this.messageEditText = lazyViewFactory.createView(R.id.messageEditText);
+        this.sendButton = lazyViewFactory.createView(R.id.sendButton);
     }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         toastHandler = new ToastHandler(this);
+
         messagingTargetIp = getIntent().getStringExtra(INTENT_MESSAGE_SERVICE_IP);
         messagingTargetUser = getIntent().getStringExtra(INTENT_MESSAGE_USER);
+
         messageViewModel = new ViewModelProvider(this,
                 new MessageViewModelFactory(messageManager, messagingTargetUser))
                 .get(MessageViewModel.class);
 
-        sendButton.get().setOnClickListener(createSendMessageOnClick());
+        // ~ this is fine, no need for live data since intent will always have the information
+        // even after the destroy/create cycle
+        messageTargetTitle.get().setText(messagingTargetUser);
 
-        messageViewModel.getMessagesLive().observe(this, messages -> {
-            var index = messages.size() - 1;
-            if (index > -1) {
-                feedbackTextView.get().setText(messages.get(index).messageText);
-            }
-        });
+        EXECUTOR.execute(this::setMessagesListViewAdapter);
+
+        sendButton.get().setOnClickListener(createSendMessageOnClick());
+    }
+
+    /**
+     * Set initial state adapter, only then add messages observer in main thread
+     */
+    private void setMessagesListViewAdapter() {
+        List<Message> startingMessages = messageManager.getMessages(messagingTargetUser);
+        messageListView.get().setAdapter(createMessageListViewAdapter(startingMessages));
+
+        Observer<List<Message>> messagesObserver = messages -> {
+            messageListView.get().setAdapter(createMessageListViewAdapter(messages));
+            scrollMessageListToBottom();
+        };
+        UiUtils.runCallbackOnMainThread(() ->
+                messageViewModel.getMessagesLive().observe(this, messagesObserver));
+    }
+
+    /**
+     * Post scroll to bottom to messages list view
+     */
+    private void scrollMessageListToBottom() {
+        var listView = messageListView.get();
+        var adapter = listView.getAdapter();
+        int lastElementIndex = adapter.getCount() - 1;
+        if (lastElementIndex > -1) {
+            listView.post(() -> listView.setSelection(lastElementIndex));
+        }
+    }
+
+    @NonNull
+    private ArrayAdapter<Message> createMessageListViewAdapter(List<Message> startingMessages) {
+        return new MessageListViewAdapter(this, android.R.layout.simple_list_item_1, startingMessages);
     }
 
     @NonNull
@@ -99,6 +138,7 @@ public class MessageActivity extends AppCompatActivity {
                     messageToSend
             );
             try {
+                // receiving messages are captured the listener defined in MainActivity
                 sendMessage(messagingTargetIp, messagePacket.toJson().getBytes());
                 messageManager.saveMessage(Message.fromSendingPacket(messagePacket));
                 UiUtils.runCallbackOnMainThread(() -> messageEditText.get().setText(""));
