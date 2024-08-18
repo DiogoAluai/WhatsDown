@@ -88,7 +88,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setMessageSocketListener() {
-        EXECUTOR.execute(createMessageSocketListener(toastHandler, message ->
+        EXECUTOR.execute(createMessageSocketListener(message ->
                 messageManager.saveMessage(Message.fromReceivingPacket(message))));
     }
 

@@ -53,6 +53,8 @@ dependencies {
 
     implementation(libs.network.utils)
     implementation(libs.sdk.boost)
+    implementation(libs.encryption)
+    testImplementation(libs.encryption)
 
     implementation(libs.jmdns)
     implementation(libs.androidx.core.ktx)

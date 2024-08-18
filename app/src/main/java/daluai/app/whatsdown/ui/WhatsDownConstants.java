@@ -9,7 +9,8 @@ public final class WhatsDownConstants {
     private WhatsDownConstants() {
     }
 
-    public static final int WHATS_DOWN_MESSAGING_PORT = 8089;
+    public static final int WHATS_DOWN_MESSAGING_PORT = 48089;
+    public static final String WHATS_DOWN_AES_SECRET = "AAAABBBBCCCCDDDD";
 
     public static final String PROP_WHATS_DOWN = "WhatsDown";
     public static final String WHATS_DOWN_UP = "Up";
