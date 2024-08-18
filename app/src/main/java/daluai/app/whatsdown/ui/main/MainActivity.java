@@ -125,6 +125,11 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
+        if (resultCode == RESULT_CANCELED) {
+            LOG.i("User came back on it's own");
+            return;
+        }
+
         if (resultCode != RESULT_OK || data == null) {
             LOG.e("Username picking activity went wrong. Result code: " + resultCode);
             toastHandler.showToast("Something went wrong, please restart the app.");
