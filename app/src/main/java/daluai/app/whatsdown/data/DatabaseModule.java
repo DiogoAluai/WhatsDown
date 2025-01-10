@@ -31,7 +31,7 @@ public class DatabaseModule {
 
     @Provides
     @Singleton
-    public static UserValueDao provideExpenseDao(AppDatabase database) {
+    public static UserValueDao provideUserValueDao(AppDatabase database) {
         return database.userValueDao();
     }
 

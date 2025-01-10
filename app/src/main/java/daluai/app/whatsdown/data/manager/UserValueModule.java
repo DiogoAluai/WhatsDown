@@ -14,7 +14,6 @@ public abstract class UserValueModule {
 
     @Binds
     @Singleton
-    @SuppressWarnings("unused")
     public abstract UserValueManager bindUserValueManager(UserValueManagerImpl impl);
 
 }

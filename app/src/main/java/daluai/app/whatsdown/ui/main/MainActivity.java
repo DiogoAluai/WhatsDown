@@ -144,7 +144,7 @@ public class MainActivity extends AppCompatActivity {
     private void registerAndStartServiceDiscovery() {
         EXECUTOR.execute(() -> {
             try {
-                jmdns = JmDNS.create(LocalIpProbe.firstActiveIPv4Interface().getInetAddress());
+                jmdns = JmDNS.create(LocalIpProbe.firstActiveIPv4Interface().inetAddress());
             } catch (IOException e) {
                 LOG.e("Could not create jmdns", e);
                 toastHandler.showToast("Failed to initialize device listener");
